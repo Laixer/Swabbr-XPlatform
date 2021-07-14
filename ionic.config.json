@@ -1,0 +1,7 @@
+{
+  "name": "Swabbr",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue"
+}
