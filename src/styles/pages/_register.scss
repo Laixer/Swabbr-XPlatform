@@ -1,0 +1,26 @@
+.register {
+  height: 100vh;
+  padding: 0 15px;
+  overflow: hidden;
+
+  &__form {
+    width: 70%;
+    max-width: 400px;
+    margin: auto;
+
+    .actions {
+      margin-top: 30px;
+
+      a {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+    }
+  }
+
+  h1 {
+    font-size: 40px;
+  }
+}

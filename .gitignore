@@ -35,3 +35,6 @@ temp/
 *.DS_Store
 *.log
 *.swp
+dist/
+ios/
+.env.development

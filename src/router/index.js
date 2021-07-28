@@ -1,6 +1,16 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import Tabs from '../views/Tabs.vue';
 
+const privateRoute = (to, from, next) => {
+  const isAuthenticated = localStorage.getItem('access_token');
+
+  if (!isAuthenticated) {
+    next({ name: 'login' });
+  } else {
+    next();
+  }
+};
+
 const routes = [
   {
     path: '/login',
@@ -14,27 +24,28 @@ const routes = [
   },
   {
     path: '/',
-    redirect: '/tabs/tab1',
-  },
-  {
-    path: '/tabs/',
     component: Tabs,
+    beforeEnter: privateRoute,
     children: [
       {
         path: '',
-        redirect: '/tabs/tab1',
+        redirect: '/home',
       },
       {
-        path: 'tab1',
-        component: () => import('@/views/Tab1.vue'),
+        path: '/home',
+        component: () => import('@/views/Home.vue'),
       },
       {
-        path: 'tab2',
-        component: () => import('@/views/Tab2.vue'),
+        path: '/search',
+        component: () => import('@/views/Search/Search.vue'),
       },
       {
-        path: 'tab3',
-        component: () => import('@/views/Tab3.vue'),
+        path: '/loves',
+        component: () => import('@/views/Loves/Loves.vue'),
+      },
+      {
+        path: '/user',
+        component: () => import('@/views/User/User.vue'),
       },
     ],
   },
@@ -42,6 +53,7 @@ const routes = [
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
+  base: '/',
   routes,
 });
 
