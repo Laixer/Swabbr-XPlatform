@@ -1,116 +1,178 @@
 <template>
-  <div>
-    Profile
-
+  <form class="profile" @submit.prevent="updateProfile()">
     <UploadProfileImage @onImageChange="handleImageChange"></UploadProfileImage>
-  </div>
+    <div>
+      <label>Date of birth</label>
+      <span>1995-01-29</span>
+    </div>
+
+    <label>Nickname</label>
+    <ion-item>
+      <ion-input
+        placeholder="Nickname"
+        required
+        v-model="user.nickname"
+      ></ion-input>
+    </ion-item>
+
+    <label>First name</label>
+    <ion-item>
+      <ion-input
+        placeholder="first name"
+        required
+        v-model="user.firstName"
+      ></ion-input>
+    </ion-item>
+
+    <label>Last name</label>
+    <ion-item>
+      <ion-input
+        placeholder="Last name"
+        required
+        v-model="user.lastName"
+      ></ion-input>
+    </ion-item>
+
+    <label>Gender</label>
+    <ion-select
+      v-model.number="user.gender"
+      ok-text="Select"
+      value="1"
+      cancel-text="Cancel"
+      placeholder="Test"
+    >
+      <ion-select-option
+        v-for="(item, index) in genderOptions"
+        :key="index"
+        :value="item.value"
+        >{{ item.text }}</ion-select-option
+      >
+    </ion-select>
+
+    <label>Is profile private?</label>
+    <ion-toggle v-model="user.isPrivate"></ion-toggle>
+
+    <label>Daily vlog request limit</label>
+    <ion-select
+      v-model.number="user.dailyVlogRequestLimit"
+      ok-text="Select"
+      value="3"
+      cancel-text="Cancel"
+    >
+      <ion-select-option
+        v-for="(value, index) in limitOptions"
+        :key="index"
+        :value="value"
+        >{{ value }}</ion-select-option
+      >
+    </ion-select>
+
+    <label>Interest</label>
+    <div>
+      <ion-item>
+        <ion-input
+          placeholder="Enter an interest..."
+          v-model="user.interest1"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          placeholder="Enter an interest..."
+          v-model="user.interest2"
+        ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input
+          placeholder="Enter an interest..."
+          v-model="user.interest3"
+        ></ion-input>
+      </ion-item>
+    </div>
+
+    <span class="btn btn--primary" @click="logout()">UITLOGGEN</span>
+    <button type="submit" class="btn btn--primary">Save</button>
+  </form>
 </template>
 
 <script>
-// import {
-//   IonPage,
-//   IonContent,
-//   IonInput,
-//   IonItem,
-//   IonIcon,
-//   IonImg,
-// } from '@ionic/vue';
+import {
+  IonInput,
+  IonSelect,
+  IonSelectOption,
+  IonToggle,
+  IonItem,
+} from '@ionic/vue';
 
-// import { person, mail, lockClosed } from 'ionicons/icons';
-// import AWS from 'aws-sdk';
+import { mapState } from 'vuex';
 
 import UploadProfileImage from '@/components/UploadProfileImage.vue';
+import { uploadFile } from '@/services/s3';
 
 export default {
   name: 'Profile',
   components: {
     UploadProfileImage,
+    IonInput,
+    IonSelect,
+    IonSelectOption,
+    IonToggle,
+    IonItem,
+    // uploadFile,
   },
   data() {
     return {
-      nickname: '',
-      email: '',
-      image: null,
+      genderOptions: [
+        {
+          value: 1,
+          text: 'Man',
+        },
+        {
+          value: 0,
+          text: 'Female',
+        },
+        {
+          value: 2,
+          text: 'Other',
+        },
+      ],
+      limitOptions: [0, 1, 2, 3],
     };
   },
 
+  computed: {
+    ...mapState('user', ['user']),
+  },
+
   methods: {
-    // async doRegister() {
-    //   let resultRegister = await this.$store.dispatch('auth/register', {
-    //     nickname: this.nickname,
-    //     email: this.email,
-    //     password: this.password,
-    //   });
+    async logout() {
+      let result = await this.$store.dispatch('auth/logout');
 
-    //   if (resultRegister) {
-    //     let user = await this.$store.dispatch('auth/login', {
-    //       email: this.email,
-    //       password: this.password,
-    //       handle: 'testtest',
-    //       pushNotificationPlatform: 1,
-    //     });
-
-    //     if (this.image && user) {
-    //       this.uploadImage(user);
-    //     }
-
-    //     if (user) {
-    //       this.$router.push('/');
-    //     }
-    //   }
-    // },
-
-    handleImageChange(image) {
-      this.image = image;
+      if (result) {
+        this.$router.push('/login');
+      }
     },
 
-    // async uploadImage(user) {
-    //   const spacesEndpoint = new AWS.Endpoint(
-    //     process.env.VUE_APP_DO_SERVICE_URI
-    //   );
+    async updateProfile() {
+      await this.$store.dispatch('user/updateProfile', this.user);
+    },
 
-    //   const s3 = new AWS.S3({
-    //     endpoint: spacesEndpoint,
-    //     accessKeyId: process.env.VUE_APP_DO_ACCESS_KEY,
-    //     secretAccessKey: process.env.VUE_APP_DO_SECRET_KEY,
-    //   });
+    async handleImageChange(image) {
+      this.image = image;
 
-    //   const base64Data = new Buffer.from(
-    //     this.image.dataUrl.replace(/^data:image\/\w+;base64,/, ''),
-    //     'base64'
-    //   );
+      const base64Data = new Buffer.from(
+        this.image.dataUrl.replace(/^data:image\/\w+;base64,/, ''),
+        'base64'
+      );
 
-    //   const params = {
-    //     Bucket: process.env.VUE_APP_DO_BUCKET,
-    //     Key: 'userprofileimages/' + user.id,
-    //     ContentType: `image/${this.image.format}`,
-    //     Body: base64Data,
-    //   };
+      const params = {
+        Bucket: process.env.VUE_APP_DO_BUCKET,
+        Key: 'userprofileimages/' + this.user.id,
+        ContentType: `image/${this.image.format}`,
+        Body: base64Data,
+      };
 
-    //   try {
-    //     await s3.putObject(params).promise();
-    //   } catch (err) {
-    //     console.log('fetch failed', err);
-    //   }
-    // },
-
-    // validateFields() {
-    //   let error = null;
-
-    //   if (!this.email || !this.nickname || !this.password) {
-    //     error = 'Not all fields are filled in.';
-    //   } else if (this.password !== this.repeatPassword) {
-    //     error = "Passwords don't match.";
-    //   } else if (this.password.length < 8) {
-    //     error = 'Password must consist of at least 8 characters.';
-    //   }
-
-    //   if (!error) {
-    //     this.doRegister();
-    //   } else {
-    //     this.$store.dispatch('global/showToast', error);
-    //   }
-    // },
+      await uploadFile(params);
+    },
   },
 };
 </script>

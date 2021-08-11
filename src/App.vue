@@ -14,5 +14,11 @@ export default defineComponent({
     IonApp,
     IonRouterOutlet,
   },
+
+  created() {
+    if (this.$store.state.auth.token) {
+      this.$store.dispatch('user/self');
+    }
+  },
 });
 </script>

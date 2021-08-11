@@ -40,21 +40,33 @@ const actions = {
     }
   },
 
-  async uploadProfileImage({}, payload) {
+  async updateProfile({}, payload) {
     try {
-      // const body = new FormData();
-
-      // body.append('file', payload);
-
-      const response = await axios.put(payload.user.profileImageUploadUri, {});
+      const response = await axios.put(
+        `${axios.defaults.baseURL}/user`,
+        payload
+      );
       if (response) {
-        // commit('setUser', response.data);
-        return response.data;
+        this.dispatch('global/showToast', 'Changes saved!');
+
+        return true;
       }
     } catch (error) {
       this.dispatch('global/showToast', error.response.data);
     }
   },
+
+  // async uploadProfileImage({}, payload) {
+  //   try {
+  //     const response = await axios.put(payload.user.profileImageUploadUri, {});
+  //     if (response) {
+  //       // commit('setUser', response.data);
+  //       return response.data;
+  //     }
+  //   } catch (error) {
+  //     this.dispatch('global/showToast', error.response.data);
+  //   }
+  // },
 };
 
 // mutations

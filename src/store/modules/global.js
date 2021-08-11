@@ -9,6 +9,11 @@ const getters = {};
 // actions
 const actions = {
   async showToast({}, payload) {
+    if (typeof payload === 'object') {
+      if (payload.errors[Object.keys(payload.errors)[0]]) {
+        payload = payload.errors[Object.keys(payload.errors)[0]];
+      }
+    }
     const toast = await toastController.create({
       componentProps: { parent: this },
       message: payload,

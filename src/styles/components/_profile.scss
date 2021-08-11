@@ -1,0 +1,33 @@
+.profile {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px 10px;
+
+  .upload-profile-image {
+    height: 75px;
+    width: 75px;
+    margin: 0;
+    margin-bottom: 20px;
+
+    .default {
+      padding: 20px;
+    }
+
+    ion-icon {
+      padding: 7px;
+      font-size: 15px;
+    }
+  }
+
+  .btn {
+    text-align: center;
+    margin-top: 25px;
+  }
+
+  label {
+    font-weight: bold;
+    display: block;
+    align-self: center;
+    font-size: 14px;
+  }
+}

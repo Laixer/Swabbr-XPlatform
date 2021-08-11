@@ -1,73 +1,75 @@
 <template>
   <ion-page>
     <ion-content class="user">
-      <ion-grid class="user__top">
-        <ion-row>
-          <ion-col size="4">
-            <div class="left">
-              <ion-img
-                v-if="image"
-                :src="image.dataUrl"
-                class="uploaded"
-              ></ion-img>
-              <ion-img
-                v-else
-                :src="require('@/assets/images/placeholder4.png')"
-                class="default"
-              ></ion-img>
+      <div class="user__fixed">
+        <ion-grid class="user__top">
+          <ion-row>
+            <ion-col size="4">
+              <div class="left">
+                <ion-img
+                  v-if="image"
+                  :src="image.dataUrl"
+                  class="uploaded"
+                ></ion-img>
+                <ion-img
+                  v-else
+                  :src="require('@/assets/images/placeholder4.png')"
+                  class="default"
+                ></ion-img>
 
-              <span>@Gert</span>
-            </div>
-          </ion-col>
-          <ion-col size="8">
-            <div class="right">
-              <div>
-                <span>{{ stats.totalFollowers }}</span>
-                <span class="label">Followers</span>
+                <span>@{{ $store.state.user.user.nickname }}</span>
               </div>
+            </ion-col>
+            <ion-col size="8">
+              <div class="right">
+                <div>
+                  <span>{{ stats.totalFollowers }}</span>
+                  <span class="label">Followers</span>
+                </div>
 
-              <div>
-                <span>{{ stats.totalFollowing }}</span>
-                <span class="label">Following</span>
-              </div>
-              <div>
-                <span>{{ stats.totalVlogs }}</span>
-                <ion-icon :icon="playCircleOutline"></ion-icon>
-              </div>
+                <div>
+                  <span>{{ stats.totalFollowing }}</span>
+                  <span class="label">Following</span>
+                </div>
+                <div>
+                  <span>{{ stats.totalVlogs }}</span>
+                  <ion-icon :icon="playCircleOutline"></ion-icon>
+                </div>
 
-              <div>
-                <span>{{ stats.totalLikesReceived }}</span>
-                <ion-icon :icon="heartOutline"></ion-icon>
-              </div>
+                <div>
+                  <span>{{ stats.totalLikesReceived }}</span>
+                  <ion-icon :icon="heartOutline"></ion-icon>
+                </div>
 
-              <div>
-                <span>{{ stats.totalViews }}</span>
-                <ion-icon :icon="eyeOutline"></ion-icon>
-              </div>
+                <div>
+                  <span>{{ stats.totalViews }}</span>
+                  <ion-icon :icon="eyeOutline"></ion-icon>
+                </div>
 
-              <div>
-                <span>{{ stats.totalReactionsGiven }}</span>
-                <ion-icon :icon="ellipseIcon"></ion-icon>
+                <div>
+                  <span>{{ stats.totalReactionsGiven }}</span>
+                  <ion-icon :icon="ellipseIcon"></ion-icon>
+                </div>
               </div>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
 
-      <div class="user__tabs">
-        <div v-for="(tab, index) in tabs" :key="index">
-          <span
-            @click="selectTab(index)"
-            class="tab"
-            :class="{ active: selectedIndex == index }"
-            >{{ tab }}</span
-          >
+        <div class="user__tabs">
+          <div v-for="(tab, index) in tabs" :key="index">
+            <span
+              @click="selectTab(index)"
+              class="tab"
+              :class="{ active: selectedIndex == index }"
+              >{{ tab }}</span
+            >
+          </div>
         </div>
       </div>
 
-      <component :is="currentTabComponent" class="user__content"> </component>
-
-      <span @click="logout()">UITLOGGEN</span>
+      <div class="user__content">
+        <component :is="currentTabComponent"> </component>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -149,14 +151,6 @@ export default {
 
     selectTab(index) {
       this.selectedIndex = index;
-    },
-
-    async logout() {
-      let result = await this.$store.dispatch('auth/logout');
-
-      if (result) {
-        this.$router.push('/login');
-      }
     },
   },
 };

@@ -1,4 +1,10 @@
 .user {
+  &__fixed {
+    position: fixed;
+    background: $white;
+    z-index: 10;
+  }
+
   &__top {
     .left {
       text-align: center;
@@ -56,6 +62,7 @@
   }
 
   &__content {
-    margin-top: 25px;
+    margin-top: 230px;
+    margin-bottom: 25px;
   }
 }

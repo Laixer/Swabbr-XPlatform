@@ -28,14 +28,14 @@ export default {
   },
 
   mounted() {
-    this.self();
+    // this.self();
   },
 
   methods: {
-    async self() {
-      let result = await this.$store.dispatch('user/self');
-      console.log(result);
-    },
+    // async self() {
+    //   let result = await this.$store.dispatch('user/self');
+    //   console.log(result);
+    // },
   },
 };
 </script>
