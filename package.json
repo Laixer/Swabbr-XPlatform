@@ -14,7 +14,7 @@
     "@capacitor/camera": "^1.0.3",
     "@capacitor/core": "3.1.1",
     "@capacitor/haptics": "1.0.2",
-    "@capacitor/ios": "3.1.1",
+    "@capacitor/ios": "3.1.2",
     "@capacitor/keyboard": "1.0.2",
     "@capacitor/status-bar": "1.0.2",
     "@ionic/vue": "^5.4.0",
@@ -42,5 +42,5 @@
     "sass-loader": "^10.1.1",
     "vue-jest": "^5.0.0-0"
   },
-  "description": "An Ionic project"
+  "description": "Swabbr"
 }

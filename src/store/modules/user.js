@@ -67,6 +67,11 @@ const actions = {
   //     this.dispatch('global/showToast', error.response.data);
   //   }
   // },
+
+  async unfollowUser({}, payload) {
+    try {
+    }
+  },
 };
 
 // mutations

@@ -1,20 +1,67 @@
 <template>
   <ion-page>
-    <ion-content :fullscreen="true">
-      Search
+    <ion-content :fullscreen="true" class="search">
+      <ion-item>
+        <ion-icon :icon="searchOutline"></ion-icon>
+        <ion-input v-model="searchInput" placeholder="Search users"></ion-input>
+      </ion-item>
+      <div class="userList" v-if="userList.length > 0">
+        <div
+          class="userList__item"
+          v-for="(user, index) in userList"
+          :key="index"
+        >
+          <ion-img
+            v-if="user.user.hasProfileImage"
+            :src="user.user.profileImageUri"
+          ></ion-img>
+          <ion-img
+            v-else
+            :src="require('@/assets/images/placeholder4.png')"
+            class="default"
+          ></ion-img>
+          <span>@{{ user.user.nickname }}</span>
+          <span
+            class="btn btn--primary"
+            @click="changeFollowRequestStatus(user, true)"
+            v-if="user.followRequestStatus == null"
+            >Follow</span
+          >
+          <span
+            class="btn btn--primary"
+            @click="changeFollowRequestStatus(user, false)"
+            v-if="user.followRequestStatus == 0"
+            >Requested</span
+          >
+          <span
+            class="btn btn--primary"
+            @click="changeFollowRequestStatus(user, false)"
+            v-if="user.followRequestStatus == 1"
+            >Following</span
+          >
+        </div>
+      </div>
+      <div v-else-if="userList.length == 0 && searchInput != ''">
+        No results
+      </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script>
+import _ from 'lodash';
 import {
   IonPage,
   IonHeader,
   IonToolbar,
   IonTitle,
   IonContent,
+  IonIcon,
+  IonInput,
 } from '@ionic/vue';
 import ExploreContainer from '@/components/ExploreContainer.vue';
+import axios from 'axios';
+import { searchOutline } from 'ionicons/icons';
 
 export default {
   name: 'Tab1',
@@ -25,6 +72,70 @@ export default {
     IonTitle,
     IonContent,
     IonPage,
+    IonIcon,
+    IonInput,
+  },
+  data() {
+    return {
+      searchInput: '',
+      searchOutline,
+      userList: {},
+    };
+  },
+
+  created() {
+    this.debouncedSearch = _.debounce(this.search, 500);
+  },
+
+  watch: {
+    searchInput: function() {
+      console.log('test');
+      this.debouncedSearch();
+    },
+  },
+
+  methods: {
+    methods: {},
+
+    async search() {
+      try {
+        const response = await axios.get(
+          `${axios.defaults.baseURL}/user/search?SortingOrder=2&Query=` +
+            this.searchInput
+        );
+        if (response) {
+          console.log(response.data);
+          this.userList = response.data;
+        }
+      } catch (error) {
+        this.dispatch('global/showToast', error.response.data);
+      }
+
+      console.log(this.userList);
+    },
+
+    async changeFollowRequestStatus(user, newStatus) {
+      let uri = 'followrequest';
+
+      if (!newStatus) {
+        uri = uri + '/unfollow';
+      }
+
+      try {
+        const response = await axios.post(
+          `${axios.defaults.baseURL}/${uri}?receiverId=${user.user.id}`
+        );
+        if (response) {
+          if (newStatus) {
+            user.followRequestStatus = 0;
+          } else {
+            user.followRequestStatus = null;
+          }
+        }
+      } catch (error) {
+        //
+      }
+    },
   },
 };
 </script>
