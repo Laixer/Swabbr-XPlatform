@@ -1,14 +1,14 @@
 <template>
   <ion-page>
-    <ion-content class="user">
-      <div class="user__fixed">
-        <ion-grid class="user__top">
-          <ion-row>
-            <ion-col size="4">
-              <div class="left">
+    <ion-header class="">
+      <ion-grid class="user__top">
+        <ion-row>
+          <ion-col size="6">
+            <div class="left">
+              <div class="profile-image">
                 <ion-img
-                  v-if="image"
-                  :src="image.dataUrl"
+                  v-if="currentUser.profileImageUri"
+                  :src="currentUser.profileImageUri"
                   class="uploaded"
                 ></ion-img>
                 <ion-img
@@ -16,59 +16,61 @@
                   :src="require('@/assets/images/placeholder4.png')"
                   class="default"
                 ></ion-img>
-
-                <span>@{{ $store.state.user.user.nickname }}</span>
               </div>
-            </ion-col>
-            <ion-col size="8">
-              <div class="right">
-                <div>
-                  <span>{{ stats.totalFollowers }}</span>
-                  <span class="label">Followers</span>
-                </div>
 
-                <div>
-                  <span>{{ stats.totalFollowing }}</span>
-                  <span class="label">Following</span>
-                </div>
-                <div>
-                  <span>{{ stats.totalVlogs }}</span>
-                  <ion-icon :icon="playCircleOutline"></ion-icon>
-                </div>
-
-                <div>
-                  <span>{{ stats.totalLikesReceived }}</span>
-                  <ion-icon :icon="heartOutline"></ion-icon>
-                </div>
-
-                <div>
-                  <span>{{ stats.totalViews }}</span>
-                  <ion-icon :icon="eyeOutline"></ion-icon>
-                </div>
-
-                <div>
-                  <span>{{ stats.totalReactionsGiven }}</span>
-                  <ion-icon :icon="ellipseIcon"></ion-icon>
-                </div>
+              <span>@{{ currentUser.nickname }}</span>
+            </div>
+          </ion-col>
+          <ion-col size="6">
+            <div class="right">
+              <div>
+                <span>{{ currentStats.totalFollowers }}</span>
+                <span class="label">Followers</span>
               </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
 
-        <div class="user__tabs">
-          <div v-for="(tab, index) in tabs" :key="index">
-            <span
-              @click="selectTab(index)"
-              class="tab"
-              :class="{ active: selectedIndex == index }"
-              >{{ tab }}</span
-            >
-          </div>
+              <div>
+                <span>{{ currentStats.totalFollowing }}</span>
+                <span class="label">Following</span>
+              </div>
+              <div>
+                <span>{{ currentStats.totalVlogs }}</span>
+                <ion-icon :icon="playCircleOutline"></ion-icon>
+              </div>
+
+              <div>
+                <span>{{ currentStats.totalLikesReceived }}</span>
+                <ion-icon :icon="heartOutline"></ion-icon>
+              </div>
+
+              <div>
+                <span>{{ currentStats.totalViews }}</span>
+                <ion-icon :icon="eyeOutline"></ion-icon>
+              </div>
+
+              <div>
+                <span>{{ currentStats.totalReactionsGiven }}</span>
+                <ion-icon :icon="ellipseIcon"></ion-icon>
+              </div>
+            </div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <div class="user__tabs">
+        <div v-for="(tab, index) in tabs" :key="index">
+          <span
+            @click="selectTab(index)"
+            class="tab"
+            :class="{ active: selectedIndex == index }"
+            >{{ tab }}</span
+          >
         </div>
       </div>
-
+    </ion-header>
+    <ion-content class="user">
       <div class="user__content">
-        <component :is="currentTabComponent"> </component>
+        <component :is="currentTabComponent" :key="selectedUser.id">
+        </component>
       </div>
     </ion-content>
   </ion-page>
@@ -84,6 +86,7 @@ import {
   IonCol,
   IonIcon,
   IonImg,
+  IonHeader,
 } from '@ionic/vue';
 
 import {
@@ -101,7 +104,7 @@ import Following from './Tabs/Following.vue';
 import Followers from './Tabs/Followers.vue';
 
 export default {
-  name: 'Test',
+  name: 'User',
   components: {
     IonContent,
     IonPage,
@@ -119,34 +122,82 @@ export default {
     eyeOutline,
     ellipse,
     IonImg,
+    IonHeader,
   },
 
   data() {
     return {
       selectedIndex: 0,
-      tabs: ['Vlogs', 'Profile', 'Following', 'Followers'],
+      tabs: this.$route.params.id
+        ? ['Vlogs', 'Following', 'Followers']
+        : ['Vlogs', 'Profile', 'Following', 'Followers'],
       playCircleOutline,
       heartOutline,
       eyeOutline,
       ellipseIcon: ellipse,
       image: null,
+      currentUser: {},
+      currentStats: {},
     };
-  },
-
-  created() {
-    this.fetchStats();
   },
 
   computed: {
     currentTabComponent: function() {
       return this.tabs[this.selectedIndex].toLowerCase();
     },
-    ...mapState('user', ['stats']),
+
+    ...mapState('user', [
+      'self',
+      'selfStats',
+      'selectedUser',
+      'selectedUserStats',
+    ]),
+  },
+
+  watch: {
+    '$route.params.id': {
+      handler() {
+        this.fetchUserData(this.$route.params.id);
+        this.selectTab(0);
+      },
+      immediate: true,
+    },
   },
 
   methods: {
-    async fetchStats() {
-      await this.$store.dispatch('user/selfStats');
+    async fetchUserData(id) {
+      if (id) {
+        await this.$store.dispatch('user/fetchSelectedUser', id);
+        await this.$store.dispatch('user/fetchSelectedUserStats', id);
+        await this.$store.dispatch('user/fetchSelectedUserFollowing', id);
+        await this.$store.dispatch('user/fetchSelectedUserFollowers', id);
+        await this.$store.dispatch('vlog/fetchCurrentUserVlogs', id);
+      } else {
+        await this.$store.dispatch('user/selfStats');
+        await this.$store.dispatch('user/fetchSelectedUserRequested');
+        await this.$store.dispatch(
+          'user/fetchSelectedUserFollowing',
+          this.self.id
+        );
+
+        await this.$store.dispatch(
+          'user/fetchSelectedUserFollowers',
+          this.self.id
+        );
+        await this.$store.dispatch('vlog/fetchCurrentUserVlogs', this.self.id);
+      }
+
+      this.setCurrentUser();
+    },
+
+    setCurrentUser() {
+      if (this.$route.params.id) {
+        this.currentUser = this.selectedUser;
+        this.currentStats = this.selectedUserStats;
+      } else {
+        this.currentUser = this.self;
+        this.currentStats = this.selfStats;
+      }
     },
 
     selectTab(index) {

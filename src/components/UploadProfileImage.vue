@@ -1,6 +1,10 @@
 <template>
   <div class="upload-profile-image">
-    <ion-img v-if="image" :src="image.dataUrl" class="uploaded"></ion-img>
+    <ion-img
+      v-if="profileImageUri"
+      :src="profileImageUri"
+      class="uploaded"
+    ></ion-img>
     <ion-img
       v-else
       :src="require('@/assets/images/placeholder4.png')"
@@ -20,6 +24,10 @@ export default {
   name: 'UploadProfileImage',
   components: { IonIcon, IonImg },
 
+  props: {
+    profileImageUri: String,
+  },
+
   data() {
     return {
       pencil,
@@ -36,7 +44,6 @@ export default {
       });
       this.image = image;
       this.$emit('onImageChange', image);
-      // this.image = Capacitor.convertFileSrc(image.path);
     },
   },
 };

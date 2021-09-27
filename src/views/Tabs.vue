@@ -7,7 +7,7 @@
           <ion-icon :icon="homeSharp" />
         </ion-tab-button>
 
-        <ion-tab-button tab="tab2" href="/search">
+        <ion-tab-button tab="search" href="/search">
           <ion-icon :icon="search" />
         </ion-tab-button>
 
@@ -15,7 +15,7 @@
           <ion-icon :icon="heart" />
         </ion-tab-button>
 
-        <ion-tab-button tab="tab4" href="/user">
+        <ion-tab-button tab="tab4" href="/self">
           <ion-icon :icon="person" />
         </ion-tab-button>
       </ion-tab-bar>
@@ -44,7 +44,7 @@ export default {
     IonPage,
     // IonRouterOutlet,
   },
-  setup() {
+  data() {
     return {
       heart,
       search,

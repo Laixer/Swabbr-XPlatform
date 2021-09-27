@@ -1,9 +1,16 @@
 <template>
   <form class="profile" @submit.prevent="updateProfile()">
-    <UploadProfileImage @onImageChange="handleImageChange"></UploadProfileImage>
+    <UploadProfileImage
+      @onImageChange="handleImageChange"
+      :profileImageUri="self.profileImageUri"
+    ></UploadProfileImage>
     <div>
       <label>Date of birth</label>
-      <span>1995-01-29</span>
+      <ion-datetime
+        placeholder="Choose Date"
+        v-model="self.birthDate"
+        displayFormat="YYYY-MM-DD"
+      ></ion-datetime>
     </div>
 
     <label>Nickname</label>
@@ -11,7 +18,7 @@
       <ion-input
         placeholder="Nickname"
         required
-        v-model="user.nickname"
+        v-model="self.nickname"
       ></ion-input>
     </ion-item>
 
@@ -20,7 +27,7 @@
       <ion-input
         placeholder="first name"
         required
-        v-model="user.firstName"
+        v-model="self.firstName"
       ></ion-input>
     </ion-item>
 
@@ -29,13 +36,13 @@
       <ion-input
         placeholder="Last name"
         required
-        v-model="user.lastName"
+        v-model="self.lastName"
       ></ion-input>
     </ion-item>
 
     <label>Gender</label>
     <ion-select
-      v-model.number="user.gender"
+      v-model.number="self.gender"
       ok-text="Select"
       value="1"
       cancel-text="Cancel"
@@ -50,11 +57,11 @@
     </ion-select>
 
     <label>Is profile private?</label>
-    <ion-toggle v-model="user.isPrivate"></ion-toggle>
+    <ion-toggle v-model="self.isPrivate"></ion-toggle>
 
     <label>Daily vlog request limit</label>
     <ion-select
-      v-model.number="user.dailyVlogRequestLimit"
+      v-model.number="self.dailyVlogRequestLimit"
       ok-text="Select"
       value="3"
       cancel-text="Cancel"
@@ -72,19 +79,19 @@
       <ion-item>
         <ion-input
           placeholder="Enter an interest..."
-          v-model="user.interest1"
+          v-model="self.interest1"
         ></ion-input>
       </ion-item>
       <ion-item>
         <ion-input
           placeholder="Enter an interest..."
-          v-model="user.interest2"
+          v-model="self.interest2"
         ></ion-input>
       </ion-item>
       <ion-item>
         <ion-input
           placeholder="Enter an interest..."
-          v-model="user.interest3"
+          v-model="self.interest3"
         ></ion-input>
       </ion-item>
     </div>
@@ -101,6 +108,7 @@ import {
   IonSelectOption,
   IonToggle,
   IonItem,
+  IonDatetime,
 } from '@ionic/vue';
 
 import { mapState } from 'vuex';
@@ -117,7 +125,8 @@ export default {
     IonSelectOption,
     IonToggle,
     IonItem,
-    // uploadFile,
+    uploadFile,
+    IonDatetime,
   },
   data() {
     return {
@@ -140,7 +149,7 @@ export default {
   },
 
   computed: {
-    ...mapState('user', ['user']),
+    ...mapState('user', ['self']),
   },
 
   methods: {
@@ -153,7 +162,8 @@ export default {
     },
 
     async updateProfile() {
-      await this.$store.dispatch('user/updateProfile', this.user);
+      this.self.birthDate = this.self.birthDate.split('+')[0];
+      await this.$store.dispatch('user/updateProfile', this.self);
     },
 
     async handleImageChange(image) {
@@ -166,7 +176,7 @@ export default {
 
       const params = {
         Bucket: process.env.VUE_APP_DO_BUCKET,
-        Key: 'userprofileimages/' + this.user.id,
+        Key: 'userprofileimages/' + this.self.id,
         ContentType: `image/${this.image.format}`,
         Body: base64Data,
       };

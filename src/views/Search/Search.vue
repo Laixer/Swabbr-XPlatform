@@ -1,15 +1,18 @@
 <template>
   <ion-page>
-    <ion-content :fullscreen="true" class="search">
+    <ion-header>
       <ion-item>
         <ion-icon :icon="searchOutline"></ion-icon>
         <ion-input v-model="searchInput" placeholder="Search users"></ion-input>
       </ion-item>
-      <div class="userList" v-if="userList.length > 0">
+    </ion-header>
+    <ion-content class="search">
+      <div class="user-list" v-if="userList.length > 0">
         <div
-          class="userList__item"
+          class="user-list__item"
           v-for="(user, index) in userList"
           :key="index"
+          @click="$router.push(`/user/${user.user.id}`)"
         >
           <ion-img
             v-if="user.user.hasProfileImage"
@@ -58,15 +61,15 @@ import {
   IonContent,
   IonIcon,
   IonInput,
+  IonItem,
+  IonImg,
 } from '@ionic/vue';
-import ExploreContainer from '@/components/ExploreContainer.vue';
 import axios from 'axios';
 import { searchOutline } from 'ionicons/icons';
 
 export default {
-  name: 'Tab1',
+  name: 'Search',
   components: {
-    ExploreContainer,
     IonHeader,
     IonToolbar,
     IonTitle,
@@ -74,6 +77,8 @@ export default {
     IonPage,
     IonIcon,
     IonInput,
+    IonItem,
+    IonImg,
   },
   data() {
     return {
@@ -89,14 +94,11 @@ export default {
 
   watch: {
     searchInput: function() {
-      console.log('test');
       this.debouncedSearch();
     },
   },
 
   methods: {
-    methods: {},
-
     async search() {
       try {
         const response = await axios.get(
@@ -110,8 +112,6 @@ export default {
       } catch (error) {
         this.dispatch('global/showToast', error.response.data);
       }
-
-      console.log(this.userList);
     },
 
     async changeFollowRequestStatus(user, newStatus) {

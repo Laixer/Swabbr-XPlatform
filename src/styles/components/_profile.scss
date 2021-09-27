@@ -3,6 +3,10 @@
   grid-template-columns: 1fr 1fr;
   gap: 5px 10px;
 
+  ion-datetime {
+    --padding-start: 0;
+  }
+
   .upload-profile-image {
     height: 75px;
     width: 75px;
