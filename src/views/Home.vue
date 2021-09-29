@@ -1,10 +1,7 @@
 <template>
   <ion-page>
     <ion-content>
-      <VlogViewer
-        v-if="recommendedVlogs.length > 0"
-        :vlogs="recommendedVlogs"
-      ></VlogViewer>
+      <VlogViewer></VlogViewer>
     </ion-content>
   </ion-page>
 </template>
@@ -21,7 +18,7 @@ import {
   IonIcon,
 } from '@ionic/vue';
 
-import { mapState } from 'vuex';
+// import { mapState } from 'vuex';
 
 import VlogViewer from '@/components/VlogViewer.vue';
 
@@ -43,12 +40,15 @@ export default {
     return {};
   },
 
-  computed: {
-    ...mapState('vlog', ['recommendedVlogs']),
-  },
+  // computed: {
+  //   ...mapState('vlog', ['recommendedVlogs']),
+  // },
 
   mounted() {
-    this.$store.dispatch('vlog/fetchRecommendedVlogs');
+    this.$store.dispatch('vlog/fetchRecommendedVlogs', {
+      offset: 0,
+      limit: 5,
+    });
   },
 
   methods: {},

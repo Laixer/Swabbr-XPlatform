@@ -2,7 +2,8 @@ import axios from 'axios';
 
 // initial state
 const state = () => ({
-  recommendedVlogs: {},
+  recommendedVlogs: [],
+  recommendedVlogsIndex: 0,
   currentUserVlogs: {},
 });
 
@@ -14,13 +15,14 @@ const getters = {
 
 // actions
 const actions = {
-  async fetchRecommendedVlogs({ commit }) {
+  async fetchRecommendedVlogs({ commit }, payload) {
     try {
       const response = await axios.get(
-        `${axios.defaults.baseURL}/vlog/wrappers-recommended`
+        `${axios.defaults.baseURL}/vlog/wrappers-recommended?SortingOrder=2&offset=${payload.offset}&limit=${payload.limit}`
       );
       if (response) {
         commit('setRecommendedVlogs', response.data);
+        return 'duno';
       }
     } catch (error) {
       this.dispatch('global/showToast', error.response.data);
@@ -32,7 +34,7 @@ const actions = {
 
     try {
       const response = await axios.get(
-        `${axios.defaults.baseURL}/vlog/wrappers-for-user/${payload}?SortingOrder=2`
+        `${axios.defaults.baseURL}/vlog/wrappers-for-user/${payload}?SortingOrder=2&offset=0&limit=10`
       );
       if (response) {
         commit('setCurrentUserVlogs', response.data);
@@ -45,8 +47,10 @@ const actions = {
 
 // mutations
 const mutations = {
+  // setRecommendedVlogs: (state, recommendedVlogs) =>
+  //   (state.recommendedVlogs = state.recommendedVlogs.push(...recommendedVlogs)),
   setRecommendedVlogs: (state, recommendedVlogs) =>
-    (state.recommendedVlogs = recommendedVlogs),
+    state.recommendedVlogs.push(...recommendedVlogs),
   setCurrentUserVlogs: (state, currentUserVlogs) =>
     (state.currentUserVlogs = currentUserVlogs),
 };

@@ -1,85 +1,123 @@
 <template>
-  <ion-slides
-    pager="false"
-    ref="slides"
-    @ionSlideDidChange="ionSlideDidChange"
-    :options="slideOpts"
+  <swiper
+    v-if="vlogs.length > 0"
+    :slides-per-view="1"
+    @swiper="onSwiper"
+    @slideChange="onSlideChange"
+    @afterInit="init()"
+    virtual
   >
-    <template class="vlog" v-for="vlogWrapper in vlogs" :key="vlogWrapper.id">
+    <swiper-slide
+      v-for="(vlogWrapper, index) in vlogs"
+      :key="index"
+      :virtualIndex="index"
+      class="vlog"
+    >
       <Vlog
         :ref="vlogWrapper.vlog.id"
         :vlogWrapper="vlogWrapper"
         @onVideoEnded="handleOnVideoEnded"
       ></Vlog>
-    </template>
-  </ion-slides>
+    </swiper-slide>
+  </swiper>
 </template>
 
 <script>
-import { IonSlides } from '@ionic/vue';
 import Vlog from '@/components/Vlog.vue';
+import { mapGetters } from 'vuex';
+
+import { Swiper, SwiperSlide } from 'swiper/vue';
+
+// import Swiper core and required modules
+import SwiperCore, { Pagination, Navigation, Virtual } from 'swiper';
+
+// install Swiper modules
+SwiperCore.use([Pagination, Navigation, Virtual]);
+
+import 'swiper/swiper.scss';
 
 export default {
   name: 'VlogViewer',
-  components: { Vlog, IonSlides },
-
-  props: {
-    vlogs: {
-      type: Object,
-      required: true,
-    },
+  components: {
+    Vlog,
+    Swiper,
+    SwiperSlide,
   },
 
   setup() {
-    const slideOpts = {
-      initialSlide: 0,
-      speed: 400,
-      noSwiping: true,
-      noSwipingClass: 'do_not_swipe',
+    return {
+      Virtual,
     };
-    return { slideOpts };
   },
 
   data() {
     return {
       offset: 0,
+      index: 0,
+      loading: false,
+      swiper: null,
     };
   },
 
-  mounted() {
-    const vlogId = this.vlogs[0].vlog.id;
-    this.$refs[vlogId].$refs[vlogId].play();
-  },
+  mounted() {},
 
   computed: {
-    // testVlogs() {
-    //   console.log(this.offset);
-    //   console.log(this.vlogs.slice(this.offset, this.offset + 3));
-    //   return this.vlogs.slice(this.offset, this.offset + 3);
-    // },
+    ...mapGetters('vlog', {
+      vlogs: 'recommendedVlogs',
+    }),
   },
 
   methods: {
-    handleOnVideoEnded() {
-      this.$refs.slides.$el.slideNext();
+    onSwiper(swiper) {
+      this.swiper = swiper;
+      console.log(this.swiper);
+    },
+    init() {
+      // this.$refs.slides.$el.slideNext();
+      // const vlogId = this.vlogs[0].vlog.id;
+      // this.$refs[vlogId].$refs[vlogId].play();
     },
 
-    ionSlideDidChange(e) {
-      e.target.getPreviousIndex().then((i) => {
-        const vlogId = this.vlogs[i].vlog.id;
-        this.$refs[vlogId].$refs[vlogId].pause();
-        this.$refs[vlogId].$refs[vlogId].currentTime = 0;
-      });
+    handleOnVideoEnded() {
+      this.swiper.slideNext();
+    },
 
-      e.target.getActiveIndex().then((i) => {
-        this.offset = i;
-        const vlogId = this.vlogs[i].vlog.id;
-        this.$refs[vlogId].$refs[vlogId].play();
-      });
+    onSlideChange(e) {
+      const previousIndex = e.previousIndex;
 
-      e.target.update().then((e) => {
-        console.log(e);
-      });
+      let previousVlogId = this.vlogs[previousIndex].vlog.id;
+      this.$refs[previousVlogId].$refs[previousVlogId].pause();
+      this.$refs[previousVlogId].$refs[previousVlogId].currentTime = 0;
+
+      const activeIndex = e.activeIndex;
+
+      let activeVlogId = this.vlogs[activeIndex].vlog.id;
+
+      this.$refs[activeVlogId].$refs[activeVlogId].play();
+      this.fetchNextVlogs(activeIndex);
+    },
+
+    fetchNextVlogs(currentIndex) {
+      const length = this.vlogs.length;
+      const limit = 5;
+
+      // console.log('Current index: ' + currentIndex);
+      // console.log('Length: ' + length);
+      // console.log('Floor:' + Math.floor(length / 2));
+
+      if (currentIndex - 1 == length - limit) {
+        this.$store
+          .dispatch('vlog/fetchRecommendedVlogs', {
+            limit: limit,
+            offset: length,
+          })
+          .then(() => {
+            // this.loading = false;
+            // this.$refs.slides.$el.update().then((d) => {
+            //   console.log(d);
+            // });
+          });
+      }
     },
   },
 };

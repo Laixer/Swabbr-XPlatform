@@ -1,5 +1,5 @@
 <template>
-  <ion-slide class="vlog">
+  <div class="vlog">
     <div class="vlog__user">
       <img :src="vlogWrapper.user.profileImageUri" />
       <span class="name">@{{ vlogWrapper.user.nickname }}</span>
@@ -12,11 +12,12 @@
       @ended="onVideoEnd()"
       @timeupdate="timeUpdate()"
       @loadedmetadata="getDuration()"
+      :poster="vlogWrapper.vlog.thumbnailUri"
     >
       <source :src="vlogWrapper.vlog.videoUri" type="video/mp4" />
     </video>
 
-    <div class="controls do_not_swipe">
+    <div class="controls swiper-no-swiping">
       <span class="current-time">{{ formatedCurrentTime }}</span>
       <input
         type="range"
@@ -49,11 +50,11 @@
 
       <div class="record"></div>
     </div>
-  </ion-slide>
+  </div>
 </template>
 
 <script>
-import { IonIcon, IonImg, IonSlide } from '@ionic/vue';
+import { IonIcon, IonImg } from '@ionic/vue';
 
 import {
   heartOutline,
@@ -64,7 +65,6 @@ import {
 export default {
   name: 'Vlog',
   components: {
-    IonSlide,
     IonIcon,
     IonImg,
     heartOutline,
